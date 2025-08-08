@@ -35,7 +35,7 @@ public class User implements UserDetails {
 
         if (role.getPermissions() == null) return null;
 
-        role.getPermissions().stream()
+        return role.getPermissions().stream()
                 .map(each -> each.name())
                 .map(each -> new SimpleGrantedAuthority(each))
 //                .map(each -> {
@@ -43,9 +43,6 @@ public class User implements UserDetails {
 //                 return new SimpleGrantedAuthority(permission);
 //                 })
                 .collect(Collectors.toList());
-
-
-        return List.of();
     }
 
     @Override
