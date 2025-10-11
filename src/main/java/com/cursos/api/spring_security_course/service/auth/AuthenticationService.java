@@ -4,6 +4,7 @@ import com.cursos.api.spring_security_course.dto.RegisteredUser;
 import com.cursos.api.spring_security_course.dto.SaveUser;
 import com.cursos.api.spring_security_course.dto.auth.AuthenticationRequest;
 import com.cursos.api.spring_security_course.dto.auth.AuthenticationResponse;
+import com.cursos.api.spring_security_course.exception.ObjectNotFoundException;
 import com.cursos.api.spring_security_course.persistence.entity.User;
 import com.cursos.api.spring_security_course.service.UserService;
 import jakarta.validation.Valid;
@@ -15,6 +16,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
+import java.nio.file.AccessDeniedException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -83,5 +85,14 @@ public class AuthenticationService {
             System.out.println(e.getMessage());
             return false;
         }
+    }
+
+    public User findLoggedInUser() {
+        Authentication auth = (UsernamePasswordAuthenticationToken) SecurityContextHolder.getContext().getAuthentication();
+
+        String username = (String) auth.getPrincipal();
+
+        return userService.findOneByUsername(username)
+                    .orElseThrow(() -> new ObjectNotFoundException("User not found. Username: " + username));
     }
 }

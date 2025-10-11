@@ -1,5 +1,6 @@
 package com.cursos.api.spring_security_course.config.security;
 
+import com.cursos.api.spring_security_course.config.security.filter.JwtAuthenticationFilter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -9,16 +10,19 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 @Configuration
 @EnableWebSecurity
 public class HttpSecurityConfig {
 
     private AuthenticationProvider daoAuthProvider;
+    private JwtAuthenticationFilter jwtAuthenticationFilter;
 
     @Autowired
-    public HttpSecurityConfig(AuthenticationProvider daoAuthProvider) {
+    public HttpSecurityConfig(AuthenticationProvider daoAuthProvider, JwtAuthenticationFilter jwtAuthenticationFilter) {
         this.daoAuthProvider = daoAuthProvider;
+        this.jwtAuthenticationFilter = jwtAuthenticationFilter;
     }
 
     @Bean
@@ -28,6 +32,7 @@ public class HttpSecurityConfig {
                 .csrf( csrfConfig -> csrfConfig.disable() )
                 .sessionManagement( sessionConfig -> sessionConfig.sessionCreationPolicy(SessionCreationPolicy.STATELESS) )
                 .authenticationProvider(daoAuthProvider)
+                .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
                 .authorizeHttpRequests( authReqConfig -> {
                     // permitidos
                     authReqConfig.requestMatchers(HttpMethod.POST,"/customers").permitAll();
