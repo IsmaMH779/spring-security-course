@@ -7,6 +7,7 @@ import com.cursos.api.spring_security_course.service.auth.AuthenticationService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -20,6 +21,7 @@ public class AuthenticationController {
         this.authenticationService = authenticationService;
     }
 
+    @PreAuthorize("permitAll")
     @GetMapping("validate-token")
     public ResponseEntity<Boolean> validate(@RequestParam String jwt) {
 
@@ -28,6 +30,7 @@ public class AuthenticationController {
         return ResponseEntity.ok(isTokenValid);
     }
 
+    @PreAuthorize("permitAll")
     @PostMapping("/authenticate")
     public ResponseEntity<AuthenticationResponse> authenticate(
             @RequestBody @Valid AuthenticationRequest authenticationRequest) {
@@ -36,7 +39,7 @@ public class AuthenticationController {
 
         return ResponseEntity.ok(rsp);
     }
-
+    @PreAuthorize("hasAnyRole('ADMINISTRATOR', 'ASSISTANT_ADMINISTRATOR', 'CUSTOMER')")
     @GetMapping("/profile")
     public ResponseEntity<User> findMyProfile() {
         User user = authenticationService.findLoggedInUser();
