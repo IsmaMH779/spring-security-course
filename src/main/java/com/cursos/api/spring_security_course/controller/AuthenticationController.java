@@ -1,9 +1,11 @@
 package com.cursos.api.spring_security_course.controller;
 
+import com.cursos.api.spring_security_course.dto.LogoutResponse;
 import com.cursos.api.spring_security_course.dto.auth.AuthenticationRequest;
 import com.cursos.api.spring_security_course.dto.auth.AuthenticationResponse;
 import com.cursos.api.spring_security_course.persistence.entity.security.User;
 import com.cursos.api.spring_security_course.service.auth.AuthenticationService;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -39,6 +41,15 @@ public class AuthenticationController {
 
         return ResponseEntity.ok(rsp);
     }
+
+    @PostMapping("/logout")
+    public ResponseEntity<LogoutResponse> logout (HttpServletRequest request) {
+        authenticationService.logout(request);
+        return ResponseEntity.ok(new LogoutResponse("Logout exitoso"));
+    }
+
+
+
     @PreAuthorize("hasAnyRole('ADMINISTRATOR', 'ASSISTANT_ADMINISTRATOR', 'CUSTOMER')")
     @GetMapping("/profile")
     public ResponseEntity<User> findMyProfile() {

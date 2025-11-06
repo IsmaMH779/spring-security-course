@@ -5,8 +5,11 @@ import com.cursos.api.spring_security_course.dto.SaveUser;
 import com.cursos.api.spring_security_course.dto.auth.AuthenticationRequest;
 import com.cursos.api.spring_security_course.dto.auth.AuthenticationResponse;
 import com.cursos.api.spring_security_course.exception.ObjectNotFoundException;
+import com.cursos.api.spring_security_course.persistence.entity.security.JwtToken;
 import com.cursos.api.spring_security_course.persistence.entity.security.User;
+import com.cursos.api.spring_security_course.persistence.repository.security.JwtTokenRepository;
 import com.cursos.api.spring_security_course.service.UserService;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -15,9 +18,11 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
 @Service
 public class AuthenticationService {
@@ -25,16 +30,20 @@ public class AuthenticationService {
     private UserService userService;
     private JwtService jwtService;
     private AuthenticationManager authenticationManager;
+    private JwtTokenRepository jwtTokenRepository;
 
     @Autowired
-    public AuthenticationService(UserService userService, JwtService jwtService, AuthenticationManager authenticationManager) {
+    public AuthenticationService(UserService userService, JwtService jwtService, AuthenticationManager authenticationManager, JwtTokenRepository jwtTokenRepository) {
         this.userService = userService;
         this.jwtService = jwtService;
         this.authenticationManager = authenticationManager;
+        this.jwtTokenRepository = jwtTokenRepository;
     }
 
     public RegisteredUser registerOneCustomer(@Valid SaveUser newUser) {
         User user = userService.registerOneCustomer(newUser);
+        String jwt = jwtService.generateToken(user, generateExtraClaims(user));
+        saveUserToken(user, jwt);
 
         RegisteredUser userDto = new RegisteredUser();
         userDto.setId(user.getId());
@@ -42,7 +51,7 @@ public class AuthenticationService {
         userDto.setUserName(user.getUsername());
         userDto.setRole(user.getRole().getName());
 
-        String jwt = jwtService.generateToken(user, generateExtraClaims(user));
+
         userDto.setJwt(jwt);
 
         return userDto;
@@ -68,11 +77,22 @@ public class AuthenticationService {
 
         UserDetails user = userService.findOneByUsername(authRequest.getUsername()).get();
         String jwt = jwtService.generateToken(user, generateExtraClaims((User) user));
+        saveUserToken((User) user, jwt);
 
         AuthenticationResponse authRsp = new AuthenticationResponse();
         authRsp.setJwt(jwt);
 
         return authRsp;
+    }
+
+    private void saveUserToken(User user, String jwt) {
+        JwtToken token = new JwtToken();
+        token.setToken(jwt);
+        token.setUser(user);
+        token.setExpiration(jwtService.extractExpiration(jwt));
+        token.setValid(true);
+
+        jwtTokenRepository.save(token);
     }
 
     public boolean validateToken(String jwt) {
@@ -93,5 +113,20 @@ public class AuthenticationService {
 
         return userService.findOneByUsername(username)
                     .orElseThrow(() -> new ObjectNotFoundException("User not found. Username: " + username));
+    }
+
+    public void logout(HttpServletRequest request) {
+
+        String jwt = jwtService.extractJwtFromRequest(request);
+
+        if (!StringUtils.hasText(jwt)) return;
+
+        Optional<JwtToken> token = jwtTokenRepository.findByToken(jwt);
+
+        if (token.isPresent() && token.get().isValid()){
+            token.get().setValid(false);
+            jwtTokenRepository.save(token.get());
+        }
+
     }
 }
