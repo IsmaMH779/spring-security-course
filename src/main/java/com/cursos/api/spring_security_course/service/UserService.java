@@ -1,10 +1,8 @@
 package com.cursos.api.spring_security_course.service;
 
 import com.cursos.api.spring_security_course.dto.SaveUser;
-import com.cursos.api.spring_security_course.persistence.entity.User;
-import jakarta.validation.Valid;
+import com.cursos.api.spring_security_course.persistence.entity.security.User;
 
-import java.util.Map;
 import java.util.Optional;
 
 public interface UserService {

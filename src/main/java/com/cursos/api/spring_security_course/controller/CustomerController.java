@@ -2,7 +2,7 @@ package com.cursos.api.spring_security_course.controller;
 
 import com.cursos.api.spring_security_course.dto.RegisteredUser;
 import com.cursos.api.spring_security_course.dto.SaveUser;
-import com.cursos.api.spring_security_course.persistence.entity.User;
+import com.cursos.api.spring_security_course.persistence.entity.security.User;
 import com.cursos.api.spring_security_course.service.auth.AuthenticationService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;

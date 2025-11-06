@@ -5,7 +5,7 @@ import com.cursos.api.spring_security_course.dto.SaveUser;
 import com.cursos.api.spring_security_course.dto.auth.AuthenticationRequest;
 import com.cursos.api.spring_security_course.dto.auth.AuthenticationResponse;
 import com.cursos.api.spring_security_course.exception.ObjectNotFoundException;
-import com.cursos.api.spring_security_course.persistence.entity.User;
+import com.cursos.api.spring_security_course.persistence.entity.security.User;
 import com.cursos.api.spring_security_course.service.UserService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,7 +16,6 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
-import java.nio.file.AccessDeniedException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -41,7 +40,7 @@ public class AuthenticationService {
         userDto.setId(user.getId());
         userDto.setName(user.getName());
         userDto.setUserName(user.getUsername());
-        userDto.setRole(user.getRole());
+        userDto.setRole(user.getRole().getName());
 
         String jwt = jwtService.generateToken(user, generateExtraClaims(user));
         userDto.setJwt(jwt);
@@ -52,7 +51,7 @@ public class AuthenticationService {
     private Map<String, Object> generateExtraClaims(User user) {
         Map<String, Object> extraClaims = new HashMap<>();
         extraClaims.put("name", user.getName());
-        extraClaims.put("role", user.getRole());
+        extraClaims.put("role", user.getRole().getName());
         extraClaims.put("authorities", user.getAuthorities());
 
         return extraClaims;

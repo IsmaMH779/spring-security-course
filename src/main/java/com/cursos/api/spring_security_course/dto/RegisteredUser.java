@@ -1,6 +1,6 @@
 package com.cursos.api.spring_security_course.dto;
 
-import com.cursos.api.spring_security_course.persistence.util.Role;
+import com.cursos.api.spring_security_course.persistence.util.RoleEnum;
 
 import java.io.Serializable;
 
@@ -9,7 +9,7 @@ public class RegisteredUser implements Serializable {
     private Long id;
     private String username;
     private String name;
-    private Role role;
+    private String role;
     private String jwt;
 
     public Long getId() {
@@ -36,11 +36,11 @@ public class RegisteredUser implements Serializable {
         this.name = name;
     }
 
-    public Role getRole() {
+    public String getRole() {
         return role;
     }
 
-    public void setRole(Role role) {
+    public void setRole(String role) {
         this.role = role;
     }
 

@@ -1,7 +1,5 @@
-package com.cursos.api.spring_security_course.persistence.entity;
+package com.cursos.api.spring_security_course.persistence.entity.security;
 
-import com.cursos.api.spring_security_course.persistence.util.Role;
-import com.cursos.api.spring_security_course.persistence.util.RolePermission;
 import jakarta.persistence.*;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -26,7 +24,8 @@ public class User implements UserDetails {
 
     private String password;
 
-    @Enumerated(EnumType.STRING)
+    @ManyToOne
+    @JoinColumn(name= "role_id")
     private Role role;
 
     @Override
@@ -36,11 +35,12 @@ public class User implements UserDetails {
         if (role.getPermissions() == null) return null;
 
         List<SimpleGrantedAuthority> authorities =  role.getPermissions().stream()
-                .map(each -> each.name())
+                .map(each -> each.getOperation().getName())
                 .map(each -> new SimpleGrantedAuthority(each))
                 .collect(Collectors.toList());
 
-        authorities.add(new SimpleGrantedAuthority("ROLE_" + this.role.name()));
+        // la linea 43 no es necesaria si ya tengo mi propio authmanager y comparo por url
+        authorities.add(new SimpleGrantedAuthority("ROLE_" + this.role.getName()));
         return authorities;
     }
 

@@ -2,9 +2,11 @@ package com.cursos.api.spring_security_course.service.impl;
 
 import com.cursos.api.spring_security_course.dto.SaveUser;
 import com.cursos.api.spring_security_course.exception.InvalidPasswordException;
-import com.cursos.api.spring_security_course.persistence.entity.User;
-import com.cursos.api.spring_security_course.persistence.repository.UserRepository;
-import com.cursos.api.spring_security_course.persistence.util.Role;
+import com.cursos.api.spring_security_course.exception.ObjectNotFoundException;
+import com.cursos.api.spring_security_course.persistence.entity.security.Role;
+import com.cursos.api.spring_security_course.persistence.entity.security.User;
+import com.cursos.api.spring_security_course.persistence.repository.security.UserRepository;
+import com.cursos.api.spring_security_course.service.RoleService;
 import com.cursos.api.spring_security_course.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -20,10 +22,13 @@ public class UserServiceImpl implements UserService {
 
     private PasswordEncoder passwordEncoder;
 
+    private RoleService roleService;
+
     @Autowired
-    public UserServiceImpl(UserRepository userRepository, PasswordEncoder passwordEncoder) {
+    public UserServiceImpl(UserRepository userRepository, PasswordEncoder passwordEncoder, RoleService roleService) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
+        this.roleService = roleService;
     }
 
     @Override
@@ -34,7 +39,10 @@ public class UserServiceImpl implements UserService {
         user.setName(newUser.getName());
         user.setUsername(newUser.getUsername());
         user.setPassword(passwordEncoder.encode(newUser.getPassword()));
-        user.setRole(Role.CUSTOMER);
+
+        Role defaultRole = roleService.findDefaultRole()
+                .orElseThrow(() -> new ObjectNotFoundException("Role not found. Default Role"));
+        user.setRole(defaultRole);
 
         return userRepository.save(user);
     }
