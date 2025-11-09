@@ -3,7 +3,7 @@ INSERT INTO module (name, base_path) VALUES ('PRODUCT', '/products');
 INSERT INTO module (name, base_path) VALUES ('CATEGORY', '/categories');
 INSERT INTO module (name, base_path) VALUES ('CUSTOMER', '/customers');
 INSERT INTO module (name, base_path) VALUES ('AUTH', '/auth');
-INSERT INTO module (name, base_path) VALUES ('PERMISSIONS', '/permissions')
+INSERT INTO module (name, base_path) VALUES ('PERMISSIONS', '/permissions');
 
 -- CREACIÓN DE OPERACIONES
 INSERT INTO operation (name, path, http_method, permit_all, module_id) VALUES ('READ_ALL_PRODUCTS','', 'GET', false, 1);
